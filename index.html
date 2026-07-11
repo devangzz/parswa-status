@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex">
+<title>Parswa ERP — Development Status</title>
+<style>
+  :root {
+    --bg: #f6f7fb;
+    --surface: #ffffff;
+    --surface-2: #f1f3f9;
+    --ink: #161922;
+    --muted: #5c6575;
+    --line: #e4e7f0;
+    --accent: #4f46e5;
+    --accent-soft: #ecedfe;
+    --good: #15803d;  --good-bg: #e7f5ec;  --good-line: #c4e6cf;
+    --warn: #b45309;  --warn-bg: #faf0e1;  --warn-line: #ecd6ac;
+    --info: #1d4ed8;  --info-bg: #e8eefc;  --info-line: #c8d7f7;
+    --shadow: 0 1px 2px rgba(20,24,40,.04), 0 8px 24px rgba(20,24,40,.05);
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1017;
+      --surface: #151a23;
+      --surface-2: #1b212c;
+      --ink: #e9edf5;
+      --muted: #98a2b4;
+      --line: #262d3a;
+      --accent: #9a9bfa;
+      --accent-soft: #1d2030;
+      --good: #55d68a;  --good-bg: #11241a;  --good-line: #21402d;
+      --warn: #f4b83d;  --warn-bg: #291f10;  --warn-line: #453413;
+      --info: #7fa5f9;  --info-bg: #121c2e;  --info-line: #223350;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1017; --surface: #151a23; --surface-2: #1b212c; --ink: #e9edf5;
+    --muted: #98a2b4; --line: #262d3a; --accent: #9a9bfa; --accent-soft: #1d2030;
+    --good: #55d68a; --good-bg: #11241a; --good-line: #21402d;
+    --warn: #f4b83d; --warn-bg: #291f10; --warn-line: #453413;
+    --info: #7fa5f9; --info-bg: #121c2e; --info-line: #223350;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"] {
+    --bg: #f6f7fb; --surface: #ffffff; --surface-2: #f1f3f9; --ink: #161922;
+    --muted: #5c6575; --line: #e4e7f0; --accent: #4f46e5; --accent-soft: #ecedfe;
+    --good: #15803d; --good-bg: #e7f5ec; --good-line: #c4e6cf;
+    --warn: #b45309; --warn-bg: #faf0e1; --warn-line: #ecd6ac;
+    --info: #1d4ed8; --info-bg: #e8eefc; --info-line: #c8d7f7;
+    --shadow: 0 1px 2px rgba(20,24,40,.04), 0 8px 24px rgba(20,24,40,.05);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: clamp(20px, 4vw, 52px) clamp(16px, 4vw, 28px) 72px; }
+
+  /* Header */
+  .eyebrow {
+    font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700; margin: 0 0 10px;
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 40px); line-height: 1.08; letter-spacing: -.02em;
+    margin: 0 0 12px; text-wrap: balance; font-weight: 800;
+  }
+  .lede { color: var(--muted); font-size: clamp(15px, 2.4vw, 17px); max-width: 62ch; margin: 0; }
+  .meta {
+    display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 20px;
+    font-size: 13.5px; color: var(--muted);
+  }
+  .meta b { color: var(--ink); font-weight: 600; }
+
+  /* Stat tiles */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 30px 0 8px; }
+  @media (max-width: 560px) { .stats { grid-template-columns: 1fr; } }
+  .stat {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px 20px; box-shadow: var(--shadow);
+  }
+  .stat .n {
+    font-size: 34px; font-weight: 800; letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums; line-height: 1;
+  }
+  .stat.done .n { color: var(--good); }
+  .stat.input .n { color: var(--warn); }
+  .stat.next .n { color: var(--info); }
+  .stat .lbl { margin-top: 8px; font-size: 13px; color: var(--muted); }
+
+  /* Legend */
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 26px 0 8px; font-size: 12.5px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .dot.g { background: var(--good); } .dot.w { background: var(--warn); } .dot.i { background: var(--info); }
+
+  /* Sections */
+  section { margin-top: 34px; }
+  .sec-head { display: flex; align-items: baseline; gap: 10px; margin: 0 0 14px; }
+  .sec-head h2 { font-size: 19px; letter-spacing: -.01em; margin: 0; font-weight: 700; }
+  .sec-head .count {
+    font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums;
+    background: var(--surface-2); border: 1px solid var(--line); padding: 2px 9px; border-radius: 20px;
+  }
+  .sec-note { color: var(--muted); font-size: 13px; margin: -6px 0 14px; }
+
+  .items { display: flex; flex-direction: column; gap: 10px; }
+  .item {
+    display: grid; grid-template-columns: 116px 1fr; gap: 16px; align-items: start;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 15px 18px; box-shadow: var(--shadow);
+  }
+  @media (max-width: 520px) { .item { grid-template-columns: 1fr; gap: 8px; } }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; align-self: start;
+    font-size: 11.5px; font-weight: 700; letter-spacing: .02em;
+    padding: 5px 10px; border-radius: 8px; white-space: nowrap;
+  }
+  .chip.g { color: var(--good); background: var(--good-bg); border: 1px solid var(--good-line); }
+  .chip.w { color: var(--warn); background: var(--warn-bg); border: 1px solid var(--warn-line); }
+  .chip.i { color: var(--info); background: var(--info-bg); border: 1px solid var(--info-line); }
+  .item .body h3 { margin: 1px 0 3px; font-size: 15px; font-weight: 650; letter-spacing: -.005em; }
+  .item .body p { margin: 0; color: var(--muted); font-size: 13.5px; }
+  .tag {
+    font-size: 11px; color: var(--muted); font-weight: 600; margin-left: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  footer {
+    margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: 12.5px; display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: space-between;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Development Status</p>
+    <h1>Parswa Wholesale ERP</h1>
+    <p class="lede">A running summary of the work completed on the system, the items waiting on your input, and what's queued next.</p>
+    <div class="meta">
+      <span>Prepared by <b>DevDart</b></span>
+      <span>Updated <b>11 July 2026</b></span>
+      <span>Status <b>Active development</b></span>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat done"><div class="n">21</div><div class="lbl">Tasks completed &amp; verified</div></div>
+    <div class="stat input"><div class="n">2</div><div class="lbl">Waiting on your input</div></div>
+    <div class="stat next"><div class="n">16</div><div class="lbl">Queued for the next phase</div></div>
+  </div>
+
+  <div class="legend">
+    <span><i class="dot g"></i> Completed</span>
+    <span><i class="dot w"></i> Needs your input</span>
+    <span><i class="dot i"></i> Planned next</span>
+  </div>
+
+  <section>
+    <div class="sec-head"><h2>Foundation &amp; environment</h2><span class="count">5 done</span></div>
+    <p class="sec-note">Groundwork so the system is safe to work on, easy to host, and reliable.</p>
+    <div class="items">
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Organised into one clean project</h3><p>Merged the scattered copies into a single, well-structured codebase.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Safe testing environment with real data</h3><p>Set up a local copy loaded with your actual customers, vendors and vouchers, so changes can be tested against real records without touching the live system.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Full project backup with history</h3><p>The entire project is now in a private, version-controlled repository — nothing can be lost.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Made portable for hosting</h3><p>Removed hard-coded settings so the system can be deployed to any server cleanly, with documented setup steps.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Fixed a database reliability issue</h3><p>Resolved a compatibility problem so pages like Agents and Special Pricing load without errors.</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>QR codes &amp; label printing</h2><span class="count">8 done</span></div>
+    <div class="items">
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>New QR page is now the main one</h3><p>The shareable-link QR page replaced the old generator, and the outdated page was retired.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Added “QR Generation” to the menu</h3><p>It’s now a clickable item in the sidebar instead of a hidden link.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Fixed a crash after generating labels</h3><p>The page no longer breaks after a print batch is created.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Regular &amp; Bunch QR types</h3><p>Added both code types in the agreed format — <em>design-colour-size-code</em> and <em>design-colour-bunch-code</em> — with an editable bunch list.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Every QR code is unique</h3><p>The system now guarantees no two labels share the same random code for the same design, colour and size.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Bulk delete for generated QRs</h3><p>Select several rows — or the whole page — and delete them in one action.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Auto-fill from Design No.</h3><p>Typing a design number fills in the name, type, MRP, colours and product image from the inventory master automatically.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Full-screen product image preview</h3><p>Click a product image to view it full screen, with an option to show or hide images.</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Common points</h2><span class="count">2 done · 16 planned</span></div>
+    <p class="sec-note">Changes that apply across every master and voucher screen.</p>
+    <div class="items">
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Browser tab shows the current page<span class="tag">#16</span></h3><p>The tab now reads the page you’re on — e.g. “Customers”, “QR Generation”.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>“Save &amp; Close” wording<span class="tag">#3</span></h3><p>The unsaved-changes prompt now says “Save &amp; Close” instead of “Save Draft &amp; Close”.</p></div></div>
+      <div class="item"><span class="chip i">Planned next</span><div class="body"><h3>App-wide rollout batch<span class="tag">16 items</span></h3><p>Consistent footer buttons, searchable dropdowns everywhere, uniform header height, party code in voucher headers, document upload &amp; capture, print options, and more — to be applied screen by screen.</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Customer</h2><span class="count">3 done · 2 awaiting input</span></div>
+    <div class="items">
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Upload size set to 16&nbsp;MB<span class="tag">#1</span></h3><p>Document uploads now allow files up to 16 MB.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Address popup “network error” resolved<span class="tag">#4</span></h3><p>The pincode auto-fill now fails quietly with a helpful hint instead of showing a network error — you can always enter city and state manually.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>WhatsApp locks with “same as phone”<span class="tag">#6</span></h3><p>When “same as phone” is ticked, the WhatsApp number can no longer be edited by mistake.</p></div></div>
+      <div class="item"><span class="chip w">Needs input</span><div class="body"><h3>“Unable to update C00013”<span class="tag">#5</span></h3><p>Updating this customer’s contact and contract details works in our testing. To fix the reported error we need the exact step and the message that appeared.</p></div></div>
+      <div class="item"><span class="chip w">Needs input</span><div class="body"><h3>Import address from GST number<span class="tag">#2</span></h3><p>This needs a GST-lookup API subscription. Ready to build as soon as a provider/key is chosen.</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>GST Master</h2><span class="count">1 done</span></div>
+    <div class="items">
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Rate field is now a dropdown</h3><p>The GST Rate field now lets you pick from the approved rates (5%, 12%, 18%, 28%) instead of typing — the missing dropdown is now visible and populated.</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Saved Transporter</h2><span class="count">2 done</span></div>
+    <div class="items">
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Coloured register / unregister column<span class="tag">#1</span></h3><p>The transporter type column shows coloured badges — blue for registered, amber for unregistered.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Corrected the “GST Type” label<span class="tag">#2</span></h3><p>The type column shows registered/unregistered correctly; the mislabeled “GST Type” search filter was renamed to “Registration Type”.</p></div></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Parswa Wholesale ERP — development status</span>
+    <span>Prepared by DevDart · 11 July 2026</span>
+  </footer>
+</div>
+
+</body>
+</html>
