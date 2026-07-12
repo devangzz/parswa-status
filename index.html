@@ -194,6 +194,14 @@
     font-size: 16px; line-height: 1; padding: 2px 4px; border-radius: 6px;
   }
   #fb-list .fb-remove:hover { color: #e5484d; background: var(--surface-2); }
+
+  /* Per-item comment button */
+  .item-cmt {
+    align-self: start; margin-top: 9px; font: inherit; font-size: 11.5px; font-weight: 600;
+    cursor: pointer; padding: 4px 10px; border-radius: 7px; border: 1px solid var(--line);
+    background: var(--surface-2); color: var(--muted); transition: all .15s;
+  }
+  .item-cmt:hover { border-color: var(--accent); color: var(--accent); }
 </style>
 </head>
 <body>
@@ -455,6 +463,29 @@
     var body = "Feedback from the Parswa status page:\n\n" + lines.join("\n\n");
     flash("Opening your email app…");
     window.location.href = "mailto:" + EMAIL + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+  });
+
+  // Add a "Comment" button to every work item; it pre-fills the form above
+  // with that item's title so the comment is tied to the specific change.
+  document.querySelectorAll(".item .body").forEach(function (body) {
+    if (body.querySelector(".item-cmt")) return;
+    var h3 = body.querySelector("h3");
+    var title = h3 ? (h3.firstChild ? h3.firstChild.textContent : h3.textContent).trim() : "";
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "item-cmt";
+    btn.textContent = "💬 Comment";
+    btn.addEventListener("click", function () {
+      typeBtns.forEach(function (x) {
+        x.classList.toggle("active", x.getAttribute("data-type") === "Comment");
+      });
+      selectedType = "Comment";
+      subjectEl.value = title;
+      document.getElementById("feedback").scrollIntoView({ behavior: "smooth", block: "start" });
+      setTimeout(function () { msgEl.focus(); }, 350);
+      flash("Commenting on: " + title);
+    });
+    body.appendChild(btn);
   });
 
   render();
