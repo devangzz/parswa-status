@@ -222,6 +222,26 @@
     <span><i class="dot i"></i> Planned next</span>
   </div>
 
+  <section id="feedback">
+    <div class="sec-head"><h2>Requests &amp; comments</h2><span class="count" id="fb-count">0</span></div>
+    <p class="sec-note">Add a comment on any change, or a new task you'd like done — it appears in the list below straight away. When you're ready, use “Send all to the team” so we receive them.</p>
+    <div class="fb-card">
+      <div class="fb-types">
+        <button type="button" class="fb-type active" data-type="Comment">💬 Comment</button>
+        <button type="button" class="fb-type" data-type="New task">✎ New task</button>
+      </div>
+      <input id="fb-subject" type="text" placeholder="Which page or feature? (e.g. Credit Note)" />
+      <textarea id="fb-message" rows="3" placeholder="Write your comment or the work you'd like done…"></textarea>
+      <div class="fb-actions">
+        <button type="button" id="fb-add" class="fb-btn primary">Add to list</button>
+        <button type="button" id="fb-send" class="fb-btn">Send all to the team</button>
+        <span id="fb-note" class="fb-hint" aria-live="polite"></span>
+      </div>
+    </div>
+    <ul id="fb-list"></ul>
+    <p id="fb-empty" class="sec-note" style="margin-top:12px">No comments yet — add one above and it'll show here.</p>
+  </section>
+
   <section>
     <div class="sec-head"><h2>Foundation &amp; environment</h2><span class="count">5 done</span></div>
     <p class="sec-note">Groundwork so the system is safe to work on, easy to host, and reliable.</p>
@@ -337,28 +357,6 @@
     </div>
   </section>
 
-  <section id="feedback">
-    <div class="sec-head"><h2>Your feedback</h2></div>
-    <p class="sec-note">Comment on any completed change, or add a new task you'd like done. Choose a type, write your note, then send it to the team by email — or copy it to share however you prefer. Your notes are also kept on this page (in your browser) so you can track what you've raised.</p>
-    <div class="fb-card">
-      <div class="fb-types">
-        <button type="button" class="fb-type active" data-type="Comment">💬 Comment on a change</button>
-        <button type="button" class="fb-type" data-type="New task">✎ New task to do</button>
-      </div>
-      <input id="fb-subject" type="text" placeholder="Which page or feature? (e.g. Credit Note, Sales Invoice)" />
-      <textarea id="fb-message" rows="4" placeholder="Write your comment or the work you'd like done…"></textarea>
-      <div class="fb-actions">
-        <button type="button" id="fb-send" class="fb-btn primary">Send via email</button>
-        <button type="button" id="fb-copy" class="fb-btn">Copy</button>
-        <span id="fb-note" class="fb-hint" aria-live="polite"></span>
-      </div>
-      <div id="fb-list-wrap" hidden>
-        <p class="fb-list-title">Your notes</p>
-        <ul id="fb-list"></ul>
-      </div>
-    </div>
-  </section>
-
   <footer>
     <span>Parswa Wholesale ERP — development status</span>
     <span>Prepared by DevDart · 12 July 2026</span>
@@ -374,8 +372,9 @@
   var subjectEl = document.getElementById("fb-subject");
   var msgEl = document.getElementById("fb-message");
   var noteEl = document.getElementById("fb-note");
-  var listWrap = document.getElementById("fb-list-wrap");
   var listEl = document.getElementById("fb-list");
+  var emptyEl = document.getElementById("fb-empty");
+  var countEl = document.getElementById("fb-count");
   if (!msgEl) return;
 
   typeBtns.forEach(function (b) {
@@ -389,10 +388,11 @@
   function load() { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { return []; } }
   function save(arr) { try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch (e) {} }
 
+  // Render the notes onto the page (newest first).
   function render() {
     var arr = load();
-    if (!arr.length) { listWrap.hidden = true; return; }
-    listWrap.hidden = false;
+    countEl.textContent = arr.length;
+    emptyEl.style.display = arr.length ? "none" : "";
     listEl.innerHTML = "";
     arr.forEach(function (item, i) {
       var li = document.createElement("li");
@@ -426,36 +426,35 @@
 
   function flash(text, isError) {
     noteEl.textContent = text;
-    noteEl.style.color = isError ? "#e5484d" : "";
+    noteEl.style.color = isError ? "#e5484d" : "var(--good)";
     setTimeout(function () { noteEl.textContent = ""; }, 3500);
   }
 
-  function currentNote() {
+  // "Add to list" — shows the note on the page immediately (no email).
+  document.getElementById("fb-add").addEventListener("click", function () {
     var message = (msgEl.value || "").trim();
-    if (!message) { flash("Please write your note first.", true); msgEl.focus(); return null; }
-    return { type: selectedType, subject: (subjectEl.value || "").trim(), message: message, date: new Date().toLocaleString() };
-  }
-
-  function persist(note) { var arr = load(); arr.unshift(note); save(arr); render(); }
-  function clearForm() { subjectEl.value = ""; msgEl.value = ""; }
-
-  document.getElementById("fb-send").addEventListener("click", function () {
-    var note = currentNote(); if (!note) return;
-    var label = note.type === "New task" ? "New task" : "Comment";
-    var subject = "[Parswa ERP] " + label + (note.subject ? ": " + note.subject : "");
-    var body = label + "\n" + (note.subject ? "Re: " + note.subject + "\n" : "") + "\n" + note.message + "\n\n— sent from the Parswa status page";
-    persist(note); clearForm(); flash("Opening your email app…");
-    window.location.href = "mailto:" + EMAIL + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+    if (!message) { flash("Please write your note first.", true); msgEl.focus(); return; }
+    var arr = load();
+    arr.unshift({ type: selectedType, subject: (subjectEl.value || "").trim(), message: message, date: new Date().toLocaleString() });
+    save(arr);
+    render();
+    subjectEl.value = ""; msgEl.value = "";
+    flash("Added ✓");
+    msgEl.focus();
   });
 
-  document.getElementById("fb-copy").addEventListener("click", function () {
-    var note = currentNote(); if (!note) return;
-    var label = note.type === "New task" ? "New task" : "Comment";
-    var text = "[Parswa ERP] " + label + (note.subject ? ": " + note.subject : "") + "\n" + note.message;
-    persist(note); clearForm();
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function () { flash("Copied — paste it into WhatsApp or email to send."); }, function () { flash("Saved below — copy it manually if needed.", true); });
-    } else { flash("Saved below."); }
+  // "Send all to the team" — bundles every note into one email.
+  document.getElementById("fb-send").addEventListener("click", function () {
+    var arr = load();
+    if (!arr.length) { flash("Add at least one note first.", true); return; }
+    var lines = arr.map(function (n, i) {
+      return (i + 1) + ". [" + (n.type === "New task" ? "TASK" : "COMMENT") + "] "
+        + (n.subject ? n.subject + " — " : "") + n.message + "  (" + n.date + ")";
+    });
+    var subject = "[Parswa ERP] " + arr.length + " request(s) / comment(s)";
+    var body = "Feedback from the Parswa status page:\n\n" + lines.join("\n\n");
+    flash("Opening your email app…");
+    window.location.href = "mailto:" + EMAIL + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
   });
 
   render();
