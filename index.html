@@ -159,7 +159,7 @@
   </header>
 
   <div class="stats">
-    <div class="stat done"><div class="n">25</div><div class="lbl">Tasks completed &amp; verified</div></div>
+    <div class="stat done"><div class="n">26</div><div class="lbl">Tasks completed &amp; verified</div></div>
     <div class="stat input"><div class="n">2</div><div class="lbl">Waiting on your input</div></div>
     <div class="stat next"><div class="n">16</div><div class="lbl">Queued for the next phase</div></div>
   </div>
@@ -257,6 +257,13 @@
     <div class="sec-head"><h2>Item Numbering</h2><span class="count">1 done</span></div>
     <div class="items">
       <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Automatic item-code numbering</h3><p>Item codes generate as a type prefix + number (e.g. <em>K0232</em> — “K” for Kurti). The number auto-increments, you can set a custom number out of sequence, and any number already in use is skipped. The 4-digit limit (9999) is handled: once reached it restarts at 1 and reuses only genuinely free numbers, blocking reuse of numbers still held by active stock until old items are cleaned up.</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Billing &amp; TDS</h2><span class="count">1 done</span></div>
+    <div class="items">
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Branch-wise TDS on sales invoices</h3><p>Each billing branch now has a “TDS Registered (0.1%)” setting. When it’s on, sales invoices for that branch automatically deduct 0.1% TDS and show <strong>Gross Amount → TDS Deducted → Net Payable</strong> (branches without it are unaffected). Amounts round correctly to two decimals.</p></div></div>
     </div>
   </section>
 
