@@ -142,6 +142,58 @@
   }
   footer a { color: var(--accent); text-decoration: none; }
   footer a:hover { text-decoration: underline; }
+
+  /* Client feedback form */
+  .fb-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px;
+  }
+  .fb-types { display: flex; flex-wrap: wrap; gap: 8px; }
+  .fb-type {
+    font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    padding: 8px 14px; border-radius: 9px; border: 1px solid var(--line);
+    background: var(--surface-2); color: var(--muted); transition: all .15s;
+  }
+  .fb-type:hover { border-color: var(--accent); color: var(--ink); }
+  .fb-type.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .fb-card input, .fb-card textarea {
+    font: inherit; width: 100%; padding: 10px 12px; border-radius: 9px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+    resize: vertical;
+  }
+  .fb-card input:focus, .fb-card textarea:focus {
+    outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .fb-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .fb-btn {
+    font: inherit; font-size: 13.5px; font-weight: 650; cursor: pointer;
+    padding: 9px 18px; border-radius: 9px; border: 1px solid var(--line);
+    background: var(--surface-2); color: var(--ink); transition: all .15s;
+  }
+  .fb-btn:hover { border-color: var(--accent); }
+  .fb-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .fb-btn.primary:hover { filter: brightness(1.05); }
+  .fb-hint { font-size: 12.5px; color: var(--good); }
+  .fb-list-title { font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 4px 0 8px; }
+  #fb-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  #fb-list li {
+    display: flex; gap: 10px; align-items: flex-start; justify-content: space-between;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px;
+  }
+  #fb-list .fb-li-body { font-size: 13px; }
+  #fb-list .fb-li-tag {
+    display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: .03em;
+    padding: 2px 7px; border-radius: 6px; margin-right: 7px;
+    background: var(--accent-soft); color: var(--accent);
+  }
+  #fb-list .fb-li-tag.task { background: var(--warn-bg); color: var(--warn); }
+  #fb-list .fb-li-sub { color: var(--muted); }
+  #fb-list .fb-li-date { color: var(--muted); font-size: 11px; margin-top: 3px; }
+  #fb-list .fb-remove {
+    font: inherit; cursor: pointer; border: none; background: none; color: var(--muted);
+    font-size: 16px; line-height: 1; padding: 2px 4px; border-radius: 6px;
+  }
+  #fb-list .fb-remove:hover { color: #e5484d; background: var(--surface-2); }
 </style>
 </head>
 <body>
@@ -153,14 +205,14 @@
     <p class="lede">A running summary of the work completed on the system, the items waiting on your input, and what's queued next.</p>
     <div class="meta">
       <span>Prepared by <b>DevDart</b></span>
-      <span>Updated <b>11 July 2026</b></span>
+      <span>Updated <b>12 July 2026</b></span>
       <span>Status <b>Active development</b></span>
     </div>
   </header>
 
   <div class="stats">
-    <div class="stat done"><div class="n">26</div><div class="lbl">Tasks completed &amp; verified</div></div>
-    <div class="stat input"><div class="n">2</div><div class="lbl">Waiting on your input</div></div>
+    <div class="stat done"><div class="n">31</div><div class="lbl">Tasks completed &amp; verified</div></div>
+    <div class="stat input"><div class="n">3</div><div class="lbl">Waiting on your input</div></div>
     <div class="stat next"><div class="n">16</div><div class="lbl">Queued for the next phase</div></div>
   </div>
 
@@ -267,11 +319,148 @@
     </div>
   </section>
 
+  <section>
+    <div class="sec-head"><h2>Expense Voucher</h2><span class="count">2 done</span></div>
+    <div class="items">
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Branch-wise last voucher date</h3><p>When a branch is selected, the form shows that branch's last expense-voucher date.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Unregistered party — no GST, net total</h3><p>Selecting an unregistered person/company now correctly drops GST and shows the plain total (previously the total could keep the earlier GST).</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Credit Note</h2><span class="count">3 done · 1 awaiting input</span></div>
+    <div class="items">
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Cancelled invoices hidden from the dropdown</h3><p>Invoices that were cancelled no longer appear when choosing an invoice for a credit note.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Selected item highlighted in the dropdown</h3><p>In the manual item entry, the chosen design/colour/size is now clearly highlighted.</p></div></div>
+      <div class="item"><span class="chip g">✓ Completed</span><div class="body"><h3>Blocks a zero-amount credit note</h3><p>A credit note can't be created when the total amount is 0.</p></div></div>
+      <div class="item"><span class="chip w">Needs input</span><div class="body"><h3>Price edit affecting quantity</h3><p>We couldn't reproduce this from the reported note — please describe the exact steps (which screen, what you change, what happens) and we'll fix it.</p></div></div>
+    </div>
+  </section>
+
+  <section id="feedback">
+    <div class="sec-head"><h2>Your feedback</h2></div>
+    <p class="sec-note">Comment on any completed change, or add a new task you'd like done. Choose a type, write your note, then send it to the team by email — or copy it to share however you prefer. Your notes are also kept on this page (in your browser) so you can track what you've raised.</p>
+    <div class="fb-card">
+      <div class="fb-types">
+        <button type="button" class="fb-type active" data-type="Comment">💬 Comment on a change</button>
+        <button type="button" class="fb-type" data-type="New task">✎ New task to do</button>
+      </div>
+      <input id="fb-subject" type="text" placeholder="Which page or feature? (e.g. Credit Note, Sales Invoice)" />
+      <textarea id="fb-message" rows="4" placeholder="Write your comment or the work you'd like done…"></textarea>
+      <div class="fb-actions">
+        <button type="button" id="fb-send" class="fb-btn primary">Send via email</button>
+        <button type="button" id="fb-copy" class="fb-btn">Copy</button>
+        <span id="fb-note" class="fb-hint" aria-live="polite"></span>
+      </div>
+      <div id="fb-list-wrap" hidden>
+        <p class="fb-list-title">Your notes</p>
+        <ul id="fb-list"></ul>
+      </div>
+    </div>
+  </section>
+
   <footer>
     <span>Parswa Wholesale ERP — development status</span>
     <span>Prepared by DevDart · 12 July 2026</span>
   </footer>
 </div>
+
+<script>
+(function () {
+  var EMAIL = "team@devdart.in";
+  var KEY = "parswa_feedback_notes";
+  var selectedType = "Comment";
+  var typeBtns = document.querySelectorAll(".fb-type");
+  var subjectEl = document.getElementById("fb-subject");
+  var msgEl = document.getElementById("fb-message");
+  var noteEl = document.getElementById("fb-note");
+  var listWrap = document.getElementById("fb-list-wrap");
+  var listEl = document.getElementById("fb-list");
+  if (!msgEl) return;
+
+  typeBtns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      typeBtns.forEach(function (x) { x.classList.remove("active"); });
+      b.classList.add("active");
+      selectedType = b.getAttribute("data-type");
+    });
+  });
+
+  function load() { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { return []; } }
+  function save(arr) { try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch (e) {} }
+
+  function render() {
+    var arr = load();
+    if (!arr.length) { listWrap.hidden = true; return; }
+    listWrap.hidden = false;
+    listEl.innerHTML = "";
+    arr.forEach(function (item, i) {
+      var li = document.createElement("li");
+      var body = document.createElement("div");
+      body.className = "fb-li-body";
+      var tag = document.createElement("span");
+      tag.className = "fb-li-tag" + (item.type === "New task" ? " task" : "");
+      tag.textContent = item.type === "New task" ? "TASK" : "COMMENT";
+      body.appendChild(tag);
+      if (item.subject) {
+        var sub = document.createElement("span");
+        sub.className = "fb-li-sub";
+        sub.textContent = item.subject + " — ";
+        body.appendChild(sub);
+      }
+      body.appendChild(document.createTextNode(item.message));
+      var date = document.createElement("div");
+      date.className = "fb-li-date";
+      date.textContent = item.date;
+      body.appendChild(date);
+      var rm = document.createElement("button");
+      rm.className = "fb-remove";
+      rm.setAttribute("aria-label", "Remove note");
+      rm.textContent = "×";
+      rm.addEventListener("click", function () { var a = load(); a.splice(i, 1); save(a); render(); });
+      li.appendChild(body);
+      li.appendChild(rm);
+      listEl.appendChild(li);
+    });
+  }
+
+  function flash(text, isError) {
+    noteEl.textContent = text;
+    noteEl.style.color = isError ? "#e5484d" : "";
+    setTimeout(function () { noteEl.textContent = ""; }, 3500);
+  }
+
+  function currentNote() {
+    var message = (msgEl.value || "").trim();
+    if (!message) { flash("Please write your note first.", true); msgEl.focus(); return null; }
+    return { type: selectedType, subject: (subjectEl.value || "").trim(), message: message, date: new Date().toLocaleString() };
+  }
+
+  function persist(note) { var arr = load(); arr.unshift(note); save(arr); render(); }
+  function clearForm() { subjectEl.value = ""; msgEl.value = ""; }
+
+  document.getElementById("fb-send").addEventListener("click", function () {
+    var note = currentNote(); if (!note) return;
+    var label = note.type === "New task" ? "New task" : "Comment";
+    var subject = "[Parswa ERP] " + label + (note.subject ? ": " + note.subject : "");
+    var body = label + "\n" + (note.subject ? "Re: " + note.subject + "\n" : "") + "\n" + note.message + "\n\n— sent from the Parswa status page";
+    persist(note); clearForm(); flash("Opening your email app…");
+    window.location.href = "mailto:" + EMAIL + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+  });
+
+  document.getElementById("fb-copy").addEventListener("click", function () {
+    var note = currentNote(); if (!note) return;
+    var label = note.type === "New task" ? "New task" : "Comment";
+    var text = "[Parswa ERP] " + label + (note.subject ? ": " + note.subject : "") + "\n" + note.message;
+    persist(note); clearForm();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { flash("Copied — paste it into WhatsApp or email to send."); }, function () { flash("Saved below — copy it manually if needed.", true); });
+    } else { flash("Saved below."); }
+  });
+
+  render();
+})();
+</script>
 
 </body>
 </html>
