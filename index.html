@@ -195,13 +195,35 @@
   }
   #fb-list .fb-remove:hover { color: #e5484d; background: var(--surface-2); }
 
-  /* Per-item comment button */
+  /* Per-item inline comments */
   .item-cmt {
     align-self: start; margin-top: 9px; font: inherit; font-size: 11.5px; font-weight: 600;
     cursor: pointer; padding: 4px 10px; border-radius: 7px; border: 1px solid var(--line);
     background: var(--surface-2); color: var(--muted); transition: all .15s;
   }
   .item-cmt:hover { border-color: var(--accent); color: var(--accent); }
+  .ic-thread { display: flex; flex-direction: column; gap: 6px; margin-top: 9px; }
+  .ic-thread:empty { display: none; }
+  .ic-note {
+    display: flex; gap: 8px; align-items: flex-start;
+    background: var(--accent-soft); border: 1px solid var(--line); border-radius: 8px;
+    padding: 7px 10px; font-size: 12.5px; color: var(--ink);
+  }
+  .ic-note .ic-msg { flex: 1; }
+  .ic-note .ic-date { color: var(--muted); font-size: 10.5px; white-space: nowrap; }
+  .ic-note .ic-remove {
+    font: inherit; cursor: pointer; border: none; background: none; color: var(--muted);
+    font-size: 15px; line-height: 1; padding: 0 2px;
+  }
+  .ic-note .ic-remove:hover { color: #e5484d; }
+  .ic-form { display: flex; flex-direction: column; gap: 7px; margin-top: 8px; }
+  .ic-form textarea {
+    font: inherit; font-size: 12.5px; width: 100%; padding: 8px 10px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink); resize: vertical;
+  }
+  .ic-form textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .ic-actions { display: flex; gap: 8px; }
+  .ic-actions .fb-btn { font-size: 12px; padding: 6px 14px; }
 </style>
 </head>
 <body>
@@ -454,38 +476,97 @@
   // "Send all to the team" — bundles every note into one email.
   document.getElementById("fb-send").addEventListener("click", function () {
     var arr = load();
-    if (!arr.length) { flash("Add at least one note first.", true); return; }
-    var lines = arr.map(function (n, i) {
-      return (i + 1) + ". [" + (n.type === "New task" ? "TASK" : "COMMENT") + "] "
-        + (n.subject ? n.subject + " — " : "") + n.message + "  (" + n.date + ")";
-    });
-    var subject = "[Parswa ERP] " + arr.length + " request(s) / comment(s)";
-    var body = "Feedback from the Parswa status page:\n\n" + lines.join("\n\n");
+    var ic = loadIC();
+    var itemKeys = Object.keys(ic);
+    if (!arr.length && !itemKeys.length) { flash("Add a note or an item comment first.", true); return; }
+    var parts = [];
+    if (arr.length) {
+      parts.push("General requests / comments:\n" + arr.map(function (n, i) {
+        return (i + 1) + ". [" + (n.type === "New task" ? "TASK" : "COMMENT") + "] "
+          + (n.subject ? n.subject + " — " : "") + n.message + "  (" + n.date + ")";
+      }).join("\n"));
+    }
+    if (itemKeys.length) {
+      parts.push("Comments on specific items:\n" + itemKeys.map(function (k) {
+        return "• " + k + ":\n" + ic[k].map(function (c) { return "    - " + c.message + "  (" + c.date + ")"; }).join("\n");
+      }).join("\n\n"));
+    }
+    var total = arr.length + itemKeys.reduce(function (s, k) { return s + ic[k].length; }, 0);
+    var subject = "[Parswa ERP] " + total + " note(s) / comment(s)";
+    var body = "Feedback from the Parswa status page:\n\n" + parts.join("\n\n");
     flash("Opening your email app…");
     window.location.href = "mailto:" + EMAIL + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
   });
 
-  // Add a "Comment" button to every work item; it pre-fills the form above
-  // with that item's title so the comment is tied to the specific change.
+  // Per-item comments: each item gets a Comment button that opens an inline
+  // box, and posted comments show right under that item (kept per item).
+  var ICKEY = "parswa_item_comments";
+  function loadIC() { try { return JSON.parse(localStorage.getItem(ICKEY) || "{}"); } catch (e) { return {}; } }
+  function saveIC(o) { try { localStorage.setItem(ICKEY, JSON.stringify(o)); } catch (e) {} }
+
   document.querySelectorAll(".item .body").forEach(function (body) {
     if (body.querySelector(".item-cmt")) return;
     var h3 = body.querySelector("h3");
     var title = h3 ? (h3.firstChild ? h3.firstChild.textContent : h3.textContent).trim() : "";
+    if (!title) return;
+
+    var thread = document.createElement("div");
+    thread.className = "ic-thread";
+
     var btn = document.createElement("button");
     btn.type = "button";
     btn.className = "item-cmt";
-    btn.textContent = "💬 Comment";
-    btn.addEventListener("click", function () {
-      typeBtns.forEach(function (x) {
-        x.classList.toggle("active", x.getAttribute("data-type") === "Comment");
-      });
-      selectedType = "Comment";
-      subjectEl.value = title;
-      document.getElementById("feedback").scrollIntoView({ behavior: "smooth", block: "start" });
-      setTimeout(function () { msgEl.focus(); }, 350);
-      flash("Commenting on: " + title);
-    });
+
+    var form = document.createElement("div");
+    form.className = "ic-form";
+    form.hidden = true;
+    var ta = document.createElement("textarea");
+    ta.rows = 2;
+    ta.placeholder = "Write your comment on this…";
+    var post = document.createElement("button");
+    post.type = "button"; post.className = "fb-btn primary"; post.textContent = "Post";
+    var cancel = document.createElement("button");
+    cancel.type = "button"; cancel.className = "fb-btn"; cancel.textContent = "Cancel";
+    var acts = document.createElement("div"); acts.className = "ic-actions";
+    acts.appendChild(post); acts.appendChild(cancel);
+    form.appendChild(ta); form.appendChild(acts);
+
+    body.appendChild(thread);
     body.appendChild(btn);
+    body.appendChild(form);
+
+    function renderThread() {
+      var all = loadIC();
+      var list = all[title] || [];
+      thread.innerHTML = "";
+      list.forEach(function (c, idx) {
+        var row = document.createElement("div");
+        row.className = "ic-note";
+        var msg = document.createElement("span"); msg.className = "ic-msg"; msg.textContent = c.message;
+        var date = document.createElement("span"); date.className = "ic-date"; date.textContent = c.date;
+        var rm = document.createElement("button"); rm.className = "ic-remove"; rm.textContent = "×"; rm.title = "Remove";
+        rm.addEventListener("click", function () {
+          var a = loadIC(); a[title].splice(idx, 1); if (!a[title].length) delete a[title]; saveIC(a); renderThread();
+        });
+        row.appendChild(msg); row.appendChild(date); row.appendChild(rm);
+        thread.appendChild(row);
+      });
+      btn.textContent = list.length ? "💬 Comment (" + list.length + ")" : "💬 Comment";
+    }
+
+    btn.addEventListener("click", function () { form.hidden = !form.hidden; if (!form.hidden) ta.focus(); });
+    cancel.addEventListener("click", function () { form.hidden = true; ta.value = ""; });
+    post.addEventListener("click", function () {
+      var msg = (ta.value || "").trim();
+      if (!msg) { ta.focus(); return; }
+      var all = loadIC();
+      (all[title] = all[title] || []).push({ message: msg, date: new Date().toLocaleString() });
+      saveIC(all);
+      ta.value = ""; form.hidden = true;
+      renderThread();
+    });
+
+    renderThread();
   });
 
   render();
